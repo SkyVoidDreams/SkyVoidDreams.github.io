@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        function detectLanguageFromCountry(country) {
+            const languageMap = {
+                'MX': 'es-MX',
+                'CO': 'es-MX',
+                'AR': 'es-MX',
+                'ES': 'es-MX',
+                'US': 'en-US'
+            };
+            return languageMap[country] || 'en-US'; // Idioma por defecto
+        }
+
+        function getBasePath() {
+            const path = window.location.pathname;
+            // Remove the filename from the path to get the base directory
+            return path.substring(0, path.lastIndexOf('/') + 1);
+        }
+
+        window.onload = function() {
+            const savedLanguage = localStorage.getItem('language');
+            const basePath = getBasePath(); // Get the base path of the current directory
+            
+            if (savedLanguage) {
+                // Redirigir al idioma guardado
+                window.location.href = `${basePath}${savedLanguage}/index.html`;
+            } else {
+                // Obtener la ubicación del usuario y ajustar el idioma
+                fetch('https://ipinfo.io/json?token=4a22983fe90630')
+				.then(response => response.json())
+				.then(data => {
+					const country = data.country;
+					const language = detectLanguageFromCountry(country);
+					
+					// Guardar el idioma seleccionado en el localStorage
+					localStorage.setItem('language', language);
+					
+					// Redirigir al idioma detectado
+					window.location.href = `${basePath}${language}/index.html`;
+				})
+				.catch(error => {
+					// En caso de error, redirigir al idioma por defecto
+					console.error('Error al obtener la ubicación:', error);
+					localStorage.setItem('language', 'en-US');
+					window.location.href = `${basePath}en-US/index.html`;
+				});
+            }
+        }
+    </script>
+</head>
+</html>
